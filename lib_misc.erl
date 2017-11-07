@@ -1,5 +1,5 @@
 -module(lib_misc).
--export([for/3, odds_and_evens/1]).
+-export([for/3, odds_and_evens/1, sleep/1]).
 
 
 % Simulate the for loop.
@@ -18,4 +18,11 @@ odds_and_evens_impl([H|T], Odds, Evens) ->
     case (H rem 2) of
         1 -> odds_and_evens_impl(T, [H|Odds], Evens);
         0 -> odds_and_evens_impl(T, Odds, [H|Evens])
+    end.
+
+% sleep() using receive with timeout
+sleep(T) ->
+    receive
+    after T ->
+        true
     end.
