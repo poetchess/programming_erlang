@@ -1,5 +1,5 @@
 -module(lib_misc).
--export([for/3, odds_and_evens/1, sleep/1]).
+-export([for/3, odds_and_evens/1, sleep/1, flush_buffer/0, priority_receive/0]).
 
 
 % Simulate the for loop.
@@ -25,4 +25,27 @@ sleep(T) ->
     receive
     after T ->
         true
+    end.
+
+
+% empty the mailbox using receive with timeout value of zero
+flush_buffer() ->
+    receive
+        _Any ->
+            flush_buffer()
+    after 0 ->
+        true
+    end.
+
+% priority receive using receive with timeout value of zero
+% using large mailbox with priority receive is rather inefficient
+priority_receive() ->
+    receive
+        {alarm, X} ->
+            {alarm, X}
+    after 0 ->
+        receive
+            Any ->
+                Any
+        end
     end.
