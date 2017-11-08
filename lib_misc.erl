@@ -1,5 +1,5 @@
 -module(lib_misc).
--export([for/3, odds_and_evens/1, sleep/1, flush_buffer/0, priority_receive/0]).
+-export([for/3, odds_and_evens/1, sleep/1, flush_buffer/0, priority_receive/0, on_exit/2, keep_alive/2]).
 
 
 % Simulate the for loop.
@@ -49,3 +49,18 @@ priority_receive() ->
                 Any
         end
     end.
+
+% watch the process pid and evaluates Fun(Why) if the process exits with the reason Why.
+on_exit(Pid, Fun) ->
+    spawn(fun() ->
+                Ref = monitor(process, Pid),
+                receive
+                    {'DOWN', Ref, process, Pid, Why} ->
+                        Fun(Why)
+                end
+          end).
+
+% process that is always alive - if it dies for any reason, it will be immediately restarted.
+keep_alive(Name, Fun) ->
+    register(Name, Pid = spawn(Fun)),
+    on_exit(Pid, fun(_Why) -> keep_alive(Name, Fun) end).
